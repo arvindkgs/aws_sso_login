@@ -4,17 +4,12 @@ Currently `aws sso login` is used to login to AWS OKTA and generate temporary cr
 
   *  #### This script aims to update .aws/credentials file with the temporary credentials generated on SSO login
   *  #### Also this script automates login without needing to open a web browser
-
-Script that automates login to AWS OKTA SSO and
-
-  1.  Prints export commands as:
-
+  *  #### Prints export commands as:
     *  export AWS_ACCESS_KEY_ID=123; export AWS_SECRET_ACCESS_KEY=123; export AWS_SESSION_TOKEN=123
+  *  also saves variables to ~/.aws/credentials
 
-  2.  also saves variables to ~/.aws/credentials
-
-    1.  If profile is already defined it replaces existing value of access_key_id, secret_access_key, session_token
-    2.  If profile does not exist it adds to file
+    *  If profile is already defined it replaces existing value of access_key_id, secret_access_ky, session_token
+    *  If profile does not exist it adds to file
 
 # Prequisite
 
