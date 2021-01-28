@@ -1,6 +1,7 @@
 AWS SSO LOGIN
 -----
 Currently `aws sso login` is used to login to AWS OKTA and generate temporary credentials. But it does not support old .aws/credentials format which terraform still refers to as specified in bug [AWS_issue_10851](https://github.com/hashicorp/terraform-provider-aws/issues/10851)
+
   *  #### This script aims to update .aws/credentials file with the temporary credentials generated on SSO login
   *  #### Also this script automates login without needing to open a web browser
 
