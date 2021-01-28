@@ -1,6 +1,8 @@
 AWS SSO LOGIN
 -----
-Script that automates login to AWS OKTA SSO and <br>
+Script that automates login to AWS OKTA SSO and
+
+
 1. Prints export commands as:
    * export AWS_ACCESS_KEY_ID=123; export AWS_SECRET_ACCESS_KEY=123; export AWS_SESSION_TOKEN=123
    * This can be added to shell by :
