@@ -9,6 +9,7 @@ Script that automates login to AWS OKTA SSO and
   `eval $(aws_sso_login)`
 
 2. also saves variables to ~/.aws/credentials
+
 1. If profile is already defined it replaces existing value of access_key_id, secret_access_key, session_token
 2. If profile does not exist it adds to file
 
@@ -27,14 +28,14 @@ Install chromedriver
 *  #### 'default' is the default profile
 *  #### '~/.aws/credentials' is the default aws credentials file path
 *  #### the script can also access arguments via environment variables as
-   * export AWS_SSO_USERNAME=""
-   * export AWS_SSO_PASSWORD=""
-   * export AWS_SSO_URL=""
-   * export AWS_CRED_FILE=""
+* export AWS_SSO_USERNAME=""
+* export AWS_SSO_PASSWORD=""
+* export AWS_SSO_URL=""
+* export AWS_CRED_FILE=""
 *  #### The precedence of picking up arguments is
-   *   #### cmd-line arguments
-   *   #### environment variables
-   *   #### default values (for profile, credentials file)
+*  #### cmd-line arguments
+*  #### environment variables
+*  #### default values (for profile, credentials file)
    
 
 # Tips
