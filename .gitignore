@@ -1,0 +1,5 @@
+venv
+dist
+build
+aws_sso_login.egg-info
+__pycache__
