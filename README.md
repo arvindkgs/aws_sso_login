@@ -39,5 +39,5 @@ Install chromedriver
 # Tips
 *  Running below command also sets the env variables on the current shell  
 `eval $(aws_sso_login)`
-*  This can be saved as an alias in your .bashrc or .zshrc
+*  This can be saved as an alias in your .bashrc or .zshrc : 
 `alias aws_sso_login='eval $(aws_sso_login)`
