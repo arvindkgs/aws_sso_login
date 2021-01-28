@@ -28,7 +28,9 @@ Install chromedriver
 
 # Usage
 
-`eval $(python -m aws_sso_login)`
+  *  Running below command also sets the env variables on the current shell
+
+    `eval $(python -m aws_sso_login)`
 
 # Options
 
@@ -50,9 +52,6 @@ Install chromedriver
    
 
 # Tips
-  *  Running below command also sets the env variables on the current shell (before running command, edit it to show full path to "aws_sso_login.py") 
-
-  `eval $(python -m aws_sso_login)`
 
   *  This can be saved as an alias in your .bashrc or .zshrc : 
 
