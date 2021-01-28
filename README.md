@@ -28,6 +28,10 @@ Install chromedriver
 
 # Usage
 
+`eval $(python -m aws_sso_login)`
+
+# Options
+
 `python -m aws_sso_login [-o|--profile profile] [-l|--url AWS_SSO_URL] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD] [-f|--aws-cred-file AWS_CRED_FILE]`
 
 #### All the arguments are optional
