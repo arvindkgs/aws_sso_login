@@ -15,11 +15,15 @@ Script that automates login to AWS OKTA SSO and
 
 Install chromedriver
 
-* In Mac ` brew install --cask chromedriver`
+  * In Mac ` brew install --cask chromedriver`
+
+# Install
+
+  * `pip install dist/aws_sso_login-0.0.1-py3-none-any.whl`
 
 # Usage
 
-`aws_sso_login [-o|--profile profile] [-l|--url AWS_SSO_URL] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD] [-f|--aws-cred-file AWS_CRED_FILE]`
+`python -m aws_sso_login [-o|--profile profile] [-l|--url AWS_SSO_URL] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD] [-f|--aws-cred-file AWS_CRED_FILE]`
 
 #### All the arguments are optional
 
@@ -37,7 +41,16 @@ Install chromedriver
    
 
 # Tips
-*  Running below command also sets the env variables on the current shell  
-`eval $(aws_sso_login)`
-*  This can be saved as an alias in your .bashrc or .zshrc : 
-`alias aws_sso_login='eval $(aws_sso_login)`
+  *  Running below command also sets the env variables on the current shell (before running command, edit it to show full path to "aws_sso_login.py") 
+
+  `eval $(python -m aws_sso_login)`
+  *  This can be saved as an alias in your .bashrc or .zshrc : 
+
+  `alias aws_sso_login='eval $(python -m aws_sso_login)`
+
+# Build
+  To make change and build,
+  1.  `python -m pip install setuptools wheel`
+  2.  `python setup.py sdist bdist_wheel`
+  
+  This will generate the dist folder containing the .whl artifact that can be install by running - `pip install aws_sso_login-0.0.1-py3-none-any.whl`
