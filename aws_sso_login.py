@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-'''
-This is a Python script that automates injecting aws session env into current shell by automating below steps:
-1. Gets AWS_SSO_URL, which redirects to OKTA login page
-2. Enters username and password and clicks enter
-3. On successful login, clicks on user account icon on aws sso page
-4. Captures session token, secret id
-5. Writes to AWS_CRED_FILE
-6. Also outputs export commands (that can used to set as env variables):
- * export AWS_ACCESS_KEY_ID=123; export AWS_SECRET_ACCESS_KEY=123; export AWS_SESSION_TOKEN=123
-'''
+"""
+This is a Python script that automates
+* Checks if cached credentials exists in .aws/cli/cache
+* If exists, checks if credentials are expired
+* If expired, updates cached credentials in .aws/cli/cache by running `export BROWSER='/bin/echo';aws sso login`
+    1. Navigates to the one-time-link given by the above cmd through selenium in a headless chrome browser
+    2. Waits for redirect to OKTA login page
+    3. Enters username and password and clicks enter
+    4. On successful login, clicks on 'Login to cli'
+    5. Exits headless browser
+    6. Waits for shell cmd to exit with message 'Successfully logged into '
+* Writes cached credentials to .aws/credentails
+"""
 import argparse
 import json
 import os
