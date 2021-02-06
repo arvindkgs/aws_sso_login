@@ -26,7 +26,7 @@ Install chromedriver
 
   *  Running below command also sets the env variables on the current shell
 
-    `eval $(python -m aws_sso_login)`
+    `python -m aws_sso_login`
 
 # Options
 
@@ -51,7 +51,7 @@ Install chromedriver
 
   *  This can be saved as an alias in your .bashrc or .zshrc : 
 
-    `alias aws_sso_login='eval $(python -m aws_sso_login)`
+    `alias aws_sso_login='python -m aws_sso_login`
 
 # Build
   To make change and build,
