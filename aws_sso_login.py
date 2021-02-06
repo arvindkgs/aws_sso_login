@@ -10,19 +10,29 @@ This is a Python script that automates injecting aws session env into current sh
  * export AWS_ACCESS_KEY_ID=123; export AWS_SECRET_ACCESS_KEY=123; export AWS_SESSION_TOKEN=123
 '''
 import argparse
+import json
 import os
 import sys
 import time
-
+from pathlib import Path
+from datetime import datetime
+from progress.bar import Bar
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.expected_conditions import visibility_of_element_located, element_to_be_clickable, \
-    presence_of_element_located
+from selenium.webdriver.support.expected_conditions import visibility_of_element_located, element_to_be_clickable
 from selenium.webdriver.support.wait import WebDriverWait
+
+from commandwatch import CommandWatch
+
+start_pattern = "https://device\.sso\.[a-z0-9-]+\.amazonaws\.com/\?user_code=[a-zA-Z0-9]+"
+end_pattern = "Successully logged into Start URL: https://.+\.awsapps\.com/start"
 
 
 def aws_login_sso(args):
+    bar = Bar('Injecting AWS credentials', max=21)
+    bar.next(1)
+    files = sorted(Path(os.path.expanduser("~/.aws/cli/cache")).iterdir(), key=os.path.getmtime)
     profile = args.profile
     username = args.username
     if not username:
@@ -35,82 +45,108 @@ def aws_login_sso(args):
         credentials_file = os.environ.get('AWS_CRED_FILE')
         if not credentials_file:
             credentials_file = "~/.aws/credentials"
-    url = args.url
-    if not url:
-        url = os.environ.get('AWS_SSO_URL')
-    if not username and not password and not url:
-        sys.exit(
-            'Usage: Required params AWS_SSO_USERNAME, AWS_SSO_PASSWORD and AWS_SSO_URL not passed and not found in '
-            'environment. To set as environment variables, execute `export USERNAME=XYZ; export PASSWORD=ABC`')
-    options = Options()
-    options.headless = True
-    driver = webdriver.Chrome(options=options)
-    driver.get(url)
-    WebDriverWait(driver, 100).until(visibility_of_element_located((By.ID, 'okta-signin-username')))
-    driver.find_element_by_id('okta-signin-username').send_keys(username)
-    driver.find_element_by_id('okta-signin-password').send_keys(password)
-    driver.find_element_by_id('okta-signin-submit').click()
-    WebDriverWait(driver, 100).until(element_to_be_clickable(
-        (By.XPATH, "/html/body/app/portal-ui/div/portal-dashboard/portal-application-list/portal-application"))).click()
-    WebDriverWait(driver, 100).until(element_to_be_clickable((By.XPATH,
-                                                              "/html/body/app/portal-ui/div/portal-dashboard/portal"
-                                                              "-application-list/sso-expander/portal-instance-list"
-                                                              "/div[1]/portal-instance/div/div"))).click()
-    WebDriverWait(driver, 100).until(element_to_be_clickable((By.XPATH,
-                                                              "/html/body/app/portal-ui/div/portal-dashboard/portal"
-                                                              "-application-list/sso-expander/portal-instance-list/"
-                                                              "div[1]/portal-instance/div/sso-expander/portal-profile-list"
-                                                              "/div/portal-profile/span/span/span[2]/a"))).click()
-    WebDriverWait(driver, 100).until(presence_of_element_located((By.XPATH,
-                                                                  "/html/body/app/portal-ui/div/portal-dashboard/portal-application-list/sso-expander/portal-instance-list/div[1]/portal-instance/div/sso-expander/portal-profile-list/div/portal-profile/span/span/span[2]/creds-modal/sso-modal/div/div/div[1]/h2")))
-    WebDriverWait(driver, 100).until(presence_of_element_located((By.XPATH,
-                                                                  "//*[@class='code-line ng-tns-c19-8']")))
-    time.sleep(2)
-    elements = driver.find_elements_by_xpath("//*[@class='code-line ng-tns-c19-8']")
-    # AWS_ACCESS_KEY_ID
-    cmd_aws_access_key_id = elements[0].get_attribute('innerText')
-    print(cmd_aws_access_key_id + ";")
-    aws_access_key_id = cmd_aws_access_key_id.split('"')[1]
-    # AWS_SECRET_ACCESS_KEY
-    cmd_aws_secret_access_key = elements[1].get_attribute('innerText')
-    print(cmd_aws_secret_access_key + ";")
-    aws_secret_access_key = cmd_aws_secret_access_key.split('"')[1]
-    # AWS_SESSION_TOKEN
-    cmd_aws_session_token = elements[2].get_attribute('innerText')
-    print(cmd_aws_session_token + ";")
-    aws_secret_session_token = cmd_aws_session_token.split('"')[1]
-    file = os.path.expanduser(credentials_file)
-    if not os.path.exists(file):
-        with open(file, 'w') as f:
-            f.write(f'[{profile}]' + "\n")
-            write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
+    run_aws_sso_login = False
+    if len(files) == 0:
+        run_aws_sso_login = True
     else:
-        in_profile = False
-        with open(file, 'r+') as f:
-            lines = f.readlines()  # read everything in the file
-            f.seek(0)
-            i = 0
-            while i < len(lines):
-                line = lines[i]
-                if line in ['\n', '\r\n']:
-                    in_profile = False
-                elif line.startswith('['):
-                    value_profile = line.split('[')[1].split(']')[0]
-                    if value_profile == profile:
-                        in_profile = True
+        with open(files[0], 'r') as creds:
+            readFile = creds.read()
+            cached_creds = json.loads(readFile)
+            if 'Credentials' in cached_creds:
+                credentials = cached_creds.get('Credentials')
+                if 'Expiration' in credentials:
+                    expires = datetime.strptime(credentials.get('Expiration'), "%Y-%m-%dT%H:%M:%SZ")
+                    if expires < datetime.now():
+                        run_aws_sso_login = True
+    if run_aws_sso_login:
+        aws_login_watch = CommandWatch(cmd="export BROWSER='/bin/echo';aws sso login", countdown=1,
+                                       match_pattern=start_pattern, end_pattern=end_pattern)
+        aws_login_watch.submit(200)
+        time.sleep(2)
+        while not len(aws_login_watch.matched_lines) > 0:
+            time.sleep(1)
+        bar.next(2)
+        url = aws_login_watch.matched_lines[0].rstrip()
+        if not username and not password:
+            sys.exit(
+                'Usage: Required params AWS_SSO_USERNAME, and AWS_SSO_PASSWORD not passed and not found in '
+                'environment. To set as environment variables, execute `export AWS_SSO_USERNAME=XYZ; export AWS_SSO_PASSWORD=ABC`')
+        bar.next()
+        options = Options()
+        options.headless = True
+        driver = webdriver.Chrome(options=options)
+        driver.get(url)
+        bar.next()
+        WebDriverWait(driver, 100).until(visibility_of_element_located((By.ID, 'okta-signin-username')))
+        bar.next()
+        driver.find_element_by_id('okta-signin-username').send_keys(username)
+        driver.find_element_by_id('okta-signin-password').send_keys(password)
+        driver.find_element_by_id('okta-signin-submit').click()
+        bar.next()
+        WebDriverWait(driver, 100).until(element_to_be_clickable(
+            (By.XPATH, "//*[@id='cli_login_button']"))).click()
+        bar.next()
+        element = WebDriverWait(driver, 100).until(element_to_be_clickable((By.XPATH,
+                                                                            "//*[@id='containerFrame']/div/div/div/div/div/h4/p[2]")))
+        if not element.text == 'You can now close this browser.':
+            driver.close()
+            sys.exit('Error: Unable to complete CLI form submission')
+        driver.close()
+        time.sleep(5)
+        bar.next(3)
+    else:
+        bar.next(10)
+    files = sorted(Path(os.path.expanduser("~/.aws/cli/cache")).iterdir(), key=os.path.getmtime)
+    if len(files) > 0:
+        with open(files[0], 'r') as creds:
+            bar.next()
+            readFile = creds.read()
+            cached_creds = json.loads(readFile)
+            # AWS_ACCESS_KEY_ID
+            aws_access_key_id = cached_creds['Credentials'].get('AccessKeyId')
+            # AWS_SECRET_ACCESS_KEY
+            aws_secret_access_key = cached_creds['Credentials'].get('SecretAccessKey')
+            # AWS_SESSION_TOKEN
+            aws_secret_session_token = cached_creds['Credentials'].get('SessionToken')
+            file = os.path.expanduser(credentials_file)
+            bar.next()
+            if not os.path.exists(file):
+                with open(file, 'w') as f:
+                    bar.next()
+                    f.write(f'[{profile}]' + "\n")
+                    write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
+                    bar.next()
+            else:
+                in_profile = False
+                with open(file, 'r+') as f:
+                    lines = f.readlines()  # read everything in the file
+                    f.seek(0)
+                    i = 0
+                    bar.next()
+                    while i < len(lines):
+                        bar.next()
+                        line = lines[i]
+                        if line in ['\n', '\r\n']:
+                            in_profile = False
+                        elif line.startswith('['):
+                            value_profile = line.split('[')[1].split(']')[0]
+                            if value_profile == profile:
+                                in_profile = True
+                                f.write(line)
+                                write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
+                                i += 1
+                                continue
+                            else:
+                                in_profile = False
+                        elif (line.startswith('aws_access_key_id=') or \
+                              line.startswith('aws_secret_access_key=') or \
+                              line.startswith('aws_session_token=')) and in_profile:
+                            i += 1
+                            continue
                         f.write(line)
-                        write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
                         i += 1
-                        continue
-                    else:
-                        in_profile = False
-                elif (line.startswith('aws_access_key_id=') or \
-                      line.startswith('aws_secret_access_key=') or \
-                      line.startswith('aws_session_token=')) and in_profile:
-                    i += 1
-                    continue
-                f.write(line)
-                i += 1
+                    bar.next(3)
+    bar.finish()
 
 
 def write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f):
