@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import time
+import logging
 from pathlib import Path
 from datetime import datetime
 from progress.bar import Bar
@@ -28,26 +29,36 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from commandwatch import CommandWatch
 
-start_pattern = "https://device\.sso\.[a-z0-9-]+\.amazonaws\.com/\?user_code=[a-zA-Z0-9]+"
+start_pattern = "https://device\.sso\.[a-z0-9-]+\.amazonaws\.com/\?user_code=[a-zA-Z0-9-]+"
 end_pattern = "Successully logged into Start URL: https://.+\.awsapps\.com/start"
 
 
 def aws_login_sso(args):
-    bar = Bar('Injecting AWS credentials', max=21)
+    logger = logging.getLogger("aws_login_sso")
+    logger.setLevel(logging.INFO)
+    h1 = logging.FileHandler(filename="aws_login_sso.log")
+    h1.setLevel(logging.INFO)
+    logger.addHandler(h1)
+    bar = Bar('Injecting AWS credentials', max=19)
     bar.next(1)
     files = sorted(Path(os.path.expanduser("~/.aws/cli/cache")).iterdir(), key=os.path.getmtime)
     profile = args.profile
     username = args.username
     if not username:
+        logger.info("Using 'AWS_SSO_USERNAME' from env")
         username = os.environ.get('AWS_SSO_USERNAME')
     password = args.password
     if not password:
+        logger.info("Using 'AWS_SSO_PASSWORD' from env")
         password = os.environ.get('AWS_SSO_PASSWORD')
     credentials_file = args.credentials_file
     if not credentials_file:
         credentials_file = os.environ.get('AWS_CRED_FILE')
         if not credentials_file:
+            logger.info("Updating '~/.aws/credentials'")
             credentials_file = "~/.aws/credentials"
+        else:
+            logger.info("Updating 'AWS_CRED_FILE' from env")
     run_aws_sso_login = False
     if len(files) == 0:
         run_aws_sso_login = True
@@ -60,10 +71,12 @@ def aws_login_sso(args):
                 if 'Expiration' in credentials:
                     expires = datetime.strptime(credentials.get('Expiration'), "%Y-%m-%dT%H:%M:%SZ")
                     if expires < datetime.now():
+                        logger.info(f'{creds.name} expired!')
                         run_aws_sso_login = True
     if run_aws_sso_login:
+        logger.info('Logging in to SSO')
         aws_login_watch = CommandWatch(cmd="export BROWSER='/bin/echo';aws sso login", countdown=1,
-                                       match_pattern=start_pattern, end_pattern=end_pattern)
+                                       end_pattern=end_pattern, match_pattern=start_pattern)
         aws_login_watch.submit(200)
         time.sleep(2)
         while not len(aws_login_watch.matched_lines) > 0:
@@ -95,26 +108,33 @@ def aws_login_sso(args):
             driver.close()
             sys.exit('Error: Unable to complete CLI form submission')
         driver.close()
-        time.sleep(5)
+        time.sleep(3)
         bar.next(3)
     else:
-        bar.next(10)
+        bar.next(7)
+        logger.info('Skipping SSO!')
+        pass
     files = sorted(Path(os.path.expanduser("~/.aws/cli/cache")).iterdir(), key=os.path.getmtime)
     if len(files) > 0:
         with open(files[0], 'r') as creds:
+            logger.info('Reading file: ' + creds.name)
             bar.next()
             readFile = creds.read()
             cached_creds = json.loads(readFile)
             # AWS_ACCESS_KEY_ID
             aws_access_key_id = cached_creds['Credentials'].get('AccessKeyId')
+            logger.info(f'aws_access_key_id: {aws_access_key_id}')
             # AWS_SECRET_ACCESS_KEY
             aws_secret_access_key = cached_creds['Credentials'].get('SecretAccessKey')
+            logger.info(f'aws_secret_access_key: {aws_secret_access_key}')
             # AWS_SESSION_TOKEN
             aws_secret_session_token = cached_creds['Credentials'].get('SessionToken')
+            logger.info(f'aws_secret_session_token: {aws_secret_session_token}')
             file = os.path.expanduser(credentials_file)
             bar.next()
             if not os.path.exists(file):
                 with open(file, 'w') as f:
+                    logger.info("Creating file: " + f.name)
                     bar.next()
                     f.write(f'[{profile}]' + "\n")
                     write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
@@ -122,6 +142,7 @@ def aws_login_sso(args):
             else:
                 in_profile = False
                 with open(file, 'r+') as f:
+                    logger.info('Editing file: ' + f.name)
                     lines = f.readlines()  # read everything in the file
                     f.seek(0)
                     i = 0
