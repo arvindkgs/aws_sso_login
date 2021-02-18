@@ -30,8 +30,7 @@ Install chromedriver
     * export AWS_SSO_USERNAME=""
     * export AWS_SSO_PASSWORD=""
 
-* Running below command also sets the env variables on the current shell
-  `eval $(aws_sso_login.py && inject_credentials.py)`
+* `eval $(aws_sso_login.py && inject_credentials.py)`
 * You can set this as a single command and invoke as `aws_sso_login` by adding
   alias `alias aws_sso_login='eval $(aws_sso_login.py && inject_credentials.py)'`
 
