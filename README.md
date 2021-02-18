@@ -16,21 +16,36 @@ Currently `aws sso login` is used to login to AWS OKTA and generate temporary cr
 
 Install chromedriver
 
-  * In Mac ` brew install --cask chromedriver`
+* In Mac ` brew install --cask chromedriver`
 
-# Install
+# Setup
 
-  * `pip install dist/aws_sso_login-0.0.1-py3-none-any.whl`
+1. Don't use virtual env
+2. `pip install -r requirements.txt`
+3. Add this folder to your path - `export PATH=$PATH:aws_sso_login`
 
 # Usage
 
-  *  Running below command also sets the env variables on the current shell
+* Set environment variables as
+    * export AWS_SSO_USERNAME=""
+    * export AWS_SSO_PASSWORD=""
 
-    `python -m aws_sso_login`
+* Running below command also sets the env variables on the current shell
+  `eval $(aws_sso_login.py && inject_credentials.py)`
+* You can set this as a single command and invoke as `aws_sso_login` by adding
+  alias `alias aws_sso_login='eval $(aws_sso_login.py && inject_credentials.py)'`
 
 # Options
 
-`python -m aws_sso_login [-o|--profile profile] [-l|--url AWS_SSO_URL] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD] [-f|--aws-cred-file AWS_CRED_FILE]`
+* There are two commands that are invoked by the single cmd - 'aws_sso_login'. However, these can be invoked separately
+  as well:
+    *  #### aws_sso_login.py
+        * This automates web login. It's options are
+          - `aws_sso_login.py [-o|--profile profile] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD]`
+    *  #### inject_credentials.py
+        * This injects credentials into ~/.aws/credentials and sets env variables *AWS_ACCESS_KEY_ID*, *
+          AWS_SECRET_ACCESS_KEY* and *AWS_SESSION_TOKEN* from ~/.aws/cli/cache.
+        * This can be invoked as - `inject_credentials.py [-h] [--profile PROFILE] [--aws-cred-file CREDENTIALS_FILE]`
 
 #### All the arguments are optional
 
@@ -39,7 +54,6 @@ Install chromedriver
   *  #### the script can also access arguments via environment variables as
     *  export AWS_SSO_USERNAME=""
     *  export AWS_SSO_PASSWORD=""
-    *  export AWS_SSO_URL=""
     *  export AWS_CRED_FILE=""
   *  #### The precedence of picking up arguments is
     *  #### cmd-line arguments
@@ -51,12 +65,4 @@ Install chromedriver
 
   *  This can be saved as an alias in your .bashrc or .zshrc : 
 
-    `alias aws_sso_login='python -m aws_sso_login`
-
-# Build
-  To make change and build,
-  
-  1.  `python -m pip install setuptools wheel`
-  2.  `python setup.py sdist bdist_wheel`
-  
-  This will generate the dist folder containing the .whl artifact that can be install by running - `pip install aws_sso_login-0.0.1-py3-none-any.whl`
+    `alias aws_sso_login='eval $(aws_sso_login.py && inject_credentials.py)'`
