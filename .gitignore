@@ -1,5 +1,2 @@
-.idea
 venv
-build
-aws_sso_login.egg-info
-__pycache__
+.idea
