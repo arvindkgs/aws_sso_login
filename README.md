@@ -20,9 +20,8 @@ Install chromedriver
 
 # Setup
 
-1. Don't use virtual env
-2. `pip install -r requirements.txt`
-3. Add this folder to your path - `export PATH=$PATH:aws_sso_login`
+1. `pip3 install -r requirements.txt`
+2. Add this folder to your path - `export PATH=$PATH:aws_sso_login`
 
 # Usage
 
@@ -31,15 +30,13 @@ Install chromedriver
     * export AWS_SSO_PASSWORD=""
 
 2. `eval $(aws_sso_login.py && inject_credentials.py)`
-3. You can set this as a single command and invoke as `aws_sso_login` by adding
-   alias `alias aws_sso_login='eval $(aws_sso_login.py && inject_credentials.py)'`
 
 # Options
 
 * There are two commands that are invoked by the single cmd - 'aws_sso_login'. However, these can be invoked separately
   as well:
     *  #### aws_sso_login.py
-        * This automates web login. It's options are
+        * This automates web login via 'aws sso login'. It's options are
           - `aws_sso_login.py [-o|--profile profile] [-u|--username AWS_SSO_USERNMAE] [-p|--password AWS_SSO_PASSWORD]`
     *  #### inject_credentials.py
         * This injects credentials into ~/.aws/credentials and sets env variables *AWS_ACCESS_KEY_ID*, *
