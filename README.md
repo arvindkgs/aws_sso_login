@@ -48,9 +48,9 @@ Install chromedriver
   *  #### 'default' is the default profile
   *  #### '~/.aws/credentials' is the default aws credentials file path
   *  #### the script can also access arguments via environment variables as
-    *  export AWS_SSO_USERNAME=""
-    *  export AWS_SSO_PASSWORD=""
-    *  export AWS_CRED_FILE=""
+      *  export AWS_SSO_USERNAME=""
+      *  export AWS_SSO_PASSWORD=""
+      *  export AWS_CRED_FILE=""
   *  #### The precedence of picking up arguments is
       *  #### cmd-line arguments
       *  #### environment variables
