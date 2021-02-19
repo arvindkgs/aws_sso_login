@@ -38,8 +38,7 @@ Install chromedriver
         * This automates web login via 'aws sso login'. It's options are
           - `aws_sso_login.py [-h] [--username USERNAME] [--password PASSWORD]`
     *  #### inject_credentials.py
-        * This injects credentials from ~/.aws/cli/cache into ~/.aws/credentials and sets env variables *AWS_ACCESS_KEY_ID*, *
-          AWS_SECRET_ACCESS_KEY* and *AWS_SESSION_TOKEN* 
+        * This injects credentials from ~/.aws/cli/cache into ~/.aws/credentials and sets env variables *AWS_ACCESS_KEY_ID*, *AWS_SECRET_ACCESS_KEY* and *AWS_SESSION_TOKEN* 
         * This can be invoked as - `inject_credentials.py [-h] [--profile PROFILE] [--aws-cred-file CREDENTIALS_FILE]`
         * You can use this command if you rather use 'aws sso login' directly.
 
