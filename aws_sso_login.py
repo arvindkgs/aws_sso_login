@@ -79,7 +79,7 @@ def aws_login_sso(args):
                 'environment. To set as environment variables, execute `export AWS_SSO_USERNAME=XYZ; export AWS_SSO_PASSWORD=ABC`')
         #bar.next()
         options = Options()
-        #options.headless = True
+        options.headless = True
         driver = webdriver.Chrome(options=options)
         driver.get(url)
         #bar.next()
