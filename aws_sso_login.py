@@ -65,7 +65,7 @@ def aws_login_sso(args):
                         run_aws_sso_login = True
     if run_aws_sso_login:
         logger.info('Logging in to SSO')
-        aws_login_watch = CommandWatch(cmd="export BROWSER='/bin/echo';aws sso login", countdown=1,
+        aws_login_watch = CommandWatch(cmd="export BROWSER='/bin/echo';aws2 sso login", countdown=1,
                                        end_pattern=end_pattern, match_pattern=start_pattern)
         aws_login_watch.submit(200)
         time.sleep(2)
