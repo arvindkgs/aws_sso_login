@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/Users/arvindkgs/.pyenv/shims/python
 import json
 import logging
 import os
@@ -14,9 +14,6 @@ This Python script copies creds from ~/.aws/cli/cache/*.json to ~/.aws/credentia
 def inject_credentials(args):
     logger = logging.getLogger("inject_credentials")
     logger.setLevel(logging.INFO)
-    h1 = logging.FileHandler(filename="credentials.log")
-    h1.setLevel(logging.INFO)
-    logger.addHandler(h1)
     credentials_file = args.credentials_file
     profile = args.profile
     if not credentials_file:
