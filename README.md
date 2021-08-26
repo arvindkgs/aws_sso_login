@@ -8,11 +8,14 @@ Currently `aws sso login` is used to login to AWS OKTA and generate temporary cr
   *  #### Updates given profile (defaults to `default` profile)
     *  If profile is already defined it replaces existing value of access_key_id, secret_access_ky, session_token
     *  If profile does not exist it adds to file
+  *  #### Works with SSO session, as well as one time AWS access/secret keys 
 
+# Prerequisites
+[AWS CLI 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
 # Setup
 
-1. Add this folder to your path - `export PATH=$PATH:aws_sso_login`
+Add this folder to your path - `export PATH=$PATH:aws_sso_login`
 
 # Usage
 
