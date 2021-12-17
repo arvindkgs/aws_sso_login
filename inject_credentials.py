@@ -1,4 +1,4 @@
-#!/Users/arvindkgs/.pyenv/shims/python
+#!/usr/bin/python3
 import json
 import logging
 import os
