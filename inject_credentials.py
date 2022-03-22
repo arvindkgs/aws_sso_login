@@ -47,6 +47,7 @@ def inject_credentials(args):
                     write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
             else:
                 in_profile = False
+                written_creds = False
                 with open(file, 'r+') as f:
                     logger.debug('Editing file: ' + f.name)
                     lines = f.readlines()  # read everything in the file
@@ -63,6 +64,7 @@ def inject_credentials(args):
                                 in_profile = True
                                 f.write(line)
                                 write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
+                                written_creds = True
                                 logger.debug('writing aws keys')
                                 i += 1
                                 continue
@@ -76,6 +78,10 @@ def inject_credentials(args):
                             continue
                         f.write(line)
                         i += 1
+                    if not written_creds:
+                        f.write('\n')
+                        f.write(f'[{profile}]' + "\n")
+                        write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
 
 
 def write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f):
