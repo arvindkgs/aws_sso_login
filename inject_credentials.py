@@ -82,6 +82,7 @@ def inject_credentials(args):
                         f.write('\n')
                         f.write(f'[{profile}]' + "\n")
                         write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f)
+                    f.truncate()
 
 
 def write_aws_creds(aws_access_key_id, aws_secret_access_key, aws_secret_session_token, f):
